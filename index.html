@@ -22,11 +22,19 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&
 function toast(x){const t=document.getElementById('toast');t.textContent=x;t.style.display='block';setTimeout(()=>t.style.display='none',2200)}
 function showError(x){return `<div class="error">${esc(x)}</div>`}
 async function init(){
- if(!configured){renderSetup();return}
- supabase=window.supabase.createClient(CFG.url,CFG.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
- const r=await supabase.auth.getSession(); session=r.data.session;
- supabase.auth.onAuthStateChange((_e,s)=>{session=s;render()});
- render();
+  try{
+    if(!configured){renderSetup();return}
+    if(!window.supabase) throw new Error('Supabase library did not load. Check your internet connection.');
+    supabase=window.supabase.createClient(CFG.url,CFG.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+    const r=await supabase.auth.getSession();
+    if(r.error) throw r.error;
+    session=r.data.session;
+    supabase.auth.onAuthStateChange((_e,s)=>{session=s;render()});
+    render();
+  }catch(e){
+    document.getElementById('root').innerHTML=
+      '<div class="login"><div class="loginbox"><h1>Syntax Technology</h1><div class="error"><b>Startup error:</b><br>'+esc(e.message||String(e))+'</div><p>Please send me a screenshot of this error.</p></div></div>';
+  }
 }
 function renderSetup(){document.getElementById('root').innerHTML=`<div class="login"><div class="loginbox"><h1>Syntax Technology</h1><p class="label">Business Management System</p><div class="info">Supabase is not connected yet. Open <b>config.js</b> and paste your <b>Publishable key</b>. The Project URL is already configured.</div><pre style="white-space:pre-wrap;background:#f8fafc;padding:12px;border-radius:8px;font-size:12px">publishableKey: 'sb_publishable_...'</pre><p class="label">Do not use a secret/service_role key here.</p></div></div>`}
 function loginPage(){document.getElementById('root').innerHTML=`<div class="login"><div class="loginbox"><h1>Syntax Technology</h1><p class="label">Business Management System</p><div id="authmsg"></div><label>Email</label><input id="email" type="email" autocomplete="email"><label style="margin-top:10px">Password</label><input id="password" type="password" autocomplete="current-password"><div class="actions"><button class="btn" style="width:100%" onclick="signIn()">Sign In</button><button class="btn light" style="width:100%" onclick="signUp()">Create Account</button></div><p class="label" style="margin-top:14px">New accounts start as Employee. Promote the owner account to Admin in Supabase after signup.</p></div></div>`}
