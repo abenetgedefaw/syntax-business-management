@@ -7,7 +7,7 @@ This version connects the browser app to your Supabase project.
 The project URL is already set in `config.js`.
 Open `config.js` and replace:
 
-`PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE`
+`sb_publishable_hGrPP0xG245Lhs-pUknc7g_ud_GDOXP`
 
 with the **Publishable key** from Supabase → Project Settings → API Keys.
 
